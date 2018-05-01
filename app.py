@@ -67,10 +67,10 @@ from flask import jsonify
 app = Flask(__name__)
 
 # Endpoint for top n winners
-@app.route('/api/list')
-def list():
-	list = session.query(Winner).limit(10).all()
-	return str(list)
+@app.route('/api/winners')
+def winners():
+	winners = session.query(Winner).limit(10).all()
+	return str(winners)
 
 # Endpoint to list individual's wins
 @app.route('/api/winner/<int:id>')
