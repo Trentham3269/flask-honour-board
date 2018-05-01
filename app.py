@@ -15,8 +15,9 @@ class Winner(Base):
 	id = Column(Integer, primary_key=True)
 	first_name = Column(String(25))
 	last_name = Column(String(25))
+	competitions = relationship("Competition")
 
-	def ___init__(self, id=None, first_name=None, last_name=None):
+	def __init__(self, id=None, first_name=None, last_name=None):
 		self.id = id
 		self.first_name = first_name
 		self.last_name = last_name
@@ -27,9 +28,10 @@ class Winner(Base):
 	def serialize(self):
 		return {
 			'id': self.id,
-			'First Name': self.first_name,
-			'Last Name': self.last_name,
-			'Full Name':"{0} {1}".format(self.first_name, self.last_name)
+			'first_name': self.first_name,
+			'last_name': self.last_name,
+			'full_name':"{0} {1}".format(self.first_name, self.last_name),
+			'wins': [w.serialize() for w in self.competitions]
 		}
 			
 class Competition(Base):
@@ -52,9 +54,8 @@ class Competition(Base):
 	def serialize(self):
 		return {
 			'id': self.id,
-			'Year': self.year,
-                        'Championship': self.championship,
-			'Winner id': self.winner
+			'year': self.year,
+                        'championship': self.championship,
 		}
              
 Session = sessionmaker(bind=engine)
@@ -65,6 +66,13 @@ from flask import jsonify
 
 app = Flask(__name__)
 
+# Endpoint for top n winners
+@app.route('/api/list')
+def list():
+	list = session.query(Winner).limit(10).all()
+	return str(list)
+
+# Endpoint to list individual's wins
 @app.route('/api/winner/<int:id>')
 def winner(id):
 	winner = session.query(Winner).filter_by(id=id).first()
