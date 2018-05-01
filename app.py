@@ -4,6 +4,8 @@ from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
+from sqlalchemy import func
+from sqlalchemy import desc
 
 engine = create_engine('postgresql:///honourboard', echo=True)
 
@@ -25,6 +27,14 @@ class Winner(Base):
 	def __repr__(self):
 		return "<Winner(first_name='%s', last_name='%s')>" % (self.first_name, self.last_name)
 
+	def serializeWinners(self):
+		return {
+			'id': self.id,		
+			'first_name': self.first_name,
+			'last_name': self.last_name,
+			'win_count': count 
+			}
+	
 	def serialize(self):
 		return {
 			'id': self.id,
@@ -69,16 +79,26 @@ app = Flask(__name__)
 # Endpoint for top n winners
 @app.route('/api/winners')
 def winners():
-	winners = session.query(Winner).limit(10).all()
+	winners = session.query(Winner.id, Winner.first_name, Winner.last_name, func.count(Competition.id)).\
+		  join(Competition).\
+	          group_by(Winner.id).\
+	          order_by(desc(func.count(Competition.id))).\
+	          limit(10).\
+                  all()
 	return str(winners)
+	#return jsonify([w.serializeWinners() for w in winners])
 
 # Endpoint to list individual's wins
 @app.route('/api/winner/<int:id>')
 def winner(id):
-	winner = session.query(Winner).filter_by(id=id).first()
+	winner = session.query(Winner).\
+		 filter_by(id=id).\
+		 first()
 	return jsonify(winner.serialize())
 
 @app.route('/api/competition/<int:id>')
 def competition(id):
-	competition = session.query(Competition).filter_by(id=id).first()
+	competition = session.query(Competition).\
+		      filter_by(id=id).\
+		      first()
 	return jsonify(competition.serialize())
