@@ -5,11 +5,11 @@ from sqlalchemy import desc, func
 from models import engine, Winner, Competition
 
 
-app = Flask(__name__)
 
 Session = sessionmaker(bind=engine)
 session = Session()
 
+app = Flask(__name__)
 # Endpoint for top n winners
 @app.route('/api/winners/<int:k>')
 def winners(k):
@@ -17,7 +17,7 @@ def winners(k):
 		join(Competition).\
 		group_by(Winner.id).\
 		order_by(desc(func.count(Competition.id))).\
-		limit(10).\
+		limit(k).\
 		all()
 	# return str(winners)
 	# print(winners[0])
