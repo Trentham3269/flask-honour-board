@@ -1,92 +1,28 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from sqlalchemy import func
-from sqlalchemy import desc
-
-engine = create_engine('postgresql:///honourboard', echo=True)
-
-Base = declarative_base()
-
-class Winner(Base):
-	__tablename__ = 'winners'
-
-	id = Column(Integer, primary_key=True)
-	first_name = Column(String(25))
-	last_name = Column(String(25))
-	competitions = relationship("Competition")
-
-	def __init__(self, id=None, first_name=None, last_name=None):
-		self.id = id
-		self.first_name = first_name
-		self.last_name = last_name
-
-	def __repr__(self):
-		return "<Winner(first_name='%s', last_name='%s')>" % (self.first_name, self.last_name)
-
-	def serializeWinners(self):
-		return {
-			'id': self.id,		
-			'first_name': self.first_name,
-			'last_name': self.last_name,
-			'win_count': count 
-			}
-	
-	def serialize(self):
-		return {
-			'id': self.id,
-			'first_name': self.first_name,
-			'last_name': self.last_name,
-			'full_name':"{0} {1}".format(self.first_name, self.last_name),
-			'wins': [w.serialize() for w in self.competitions]
-		}
-			
-class Competition(Base):
-	__tablename__ = 'competitions'
-
-	id = Column(Integer, primary_key=True)
-	year = Column(Integer)
-	championship = Column(String(10))
-	winner = Column(Integer, ForeignKey('winners.id'))
-
-	def __init__(self, id=None, year=None, championship=None, winner=None):
-		self.id = id
-		self.year = year
-		self.championship = championship
-		self.winner = winner
-
-	def __repr__(self):
-		return "<Competition(year='%s', championship='%s', winner='%i')>" % (self.year, self.championship, self.winner)
-
-	def serialize(self):
-		return {
-			'id': self.id,
-			'year': self.year,
-                        'championship': self.championship,
-		}
-             
-Session = sessionmaker(bind=engine)
-session = Session()
-
 from flask import Flask
 from flask import jsonify
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import desc, func
+from models import engine, Winner, Competition
+
 
 app = Flask(__name__)
 
+Session = sessionmaker(bind=engine)
+session = Session()
+
 # Endpoint for top n winners
-@app.route('/api/winners')
-def winners():
-	winners = session.query(Winner.id, Winner.first_name, Winner.last_name, func.count(Competition.id)).\
-		  join(Competition).\
-	          group_by(Winner.id).\
-	          order_by(desc(func.count(Competition.id))).\
-	          limit(10).\
-                  all()
-	return str(winners)
-	#return jsonify([w.serializeWinners() for w in winners])
+@app.route('/api/winners/<int:k>')
+def winners(k):
+	winners = session.query(Winner).\
+		join(Competition).\
+		group_by(Winner.id).\
+		order_by(desc(func.count(Competition.id))).\
+		limit(10).\
+		all()
+	# return str(winners)
+	# print(winners[0])
+	# return "woohooo"
+	return jsonify([w.serializeWinners() for w in winners])
 
 # Endpoint to list individual's wins
 @app.route('/api/winner/<int:id>')
