@@ -1,5 +1,4 @@
-from flask import Flask
-from flask import jsonify
+from flask import Flask, jsonify, send_from_directory
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import desc, func
 from models import engine, Winner, Competition
@@ -10,6 +9,12 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 app = Flask(__name__)
+
+@app.route('/')
+def index():
+	return send_from_directory(directory="static", filename="index.html")
+
+
 # Endpoint for top n winners
 @app.route('/api/winners/<int:k>')
 def winners(k):

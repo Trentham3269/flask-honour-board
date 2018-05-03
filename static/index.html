@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Winners</title>
+</head>
+<body>
+<h2>Hello winners</h2>
+<div id="app">
+  {{ message }}
+  <input type="number" name="kwinners" v-model="k">
+  <button v-on:click="getWinners()">Get Winners</button>
+  <ul v-if="topWinners.length > 0">
+  	<li v-for="w in topWinners">
+  		{{w.first_name}} {{w.last_name}}
+  	</li>
+  </ul>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script type="text/javascript">
+var app = new Vue({
+  el: '#app',
+  data: {
+    message: 'Do you want to know our best winners?',
+    topWinners:[],
+    k:10
+  },
+  methods: {
+	    getWinners:function(){
+	    	// console.log("clicked");
+	    	var link = '/api/winners/' + this.k;
+			axios.get(link)
+			  .then(response => (
+			  	this.topWinners = response.data))
+			  .catch(function (error) {
+			    console.log(error);
+			  });
+	  }
+  }
+})
+</script>
+</body>
+</html>
