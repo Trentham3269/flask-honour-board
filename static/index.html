@@ -9,11 +9,16 @@
   {{ message }}
   <input type="number" name="kwinners" v-model="k">
   <button v-on:click="getWinners()">Get Winners</button>
-  <ul v-if="topWinners.length > 0">
+  <ol v-if="topWinners.length > 0">
   	<li v-for="w in topWinners">
-  		{{w.first_name}} {{w.last_name}}
+  	 <div v-on:click="getWins()">{{ w.first_name }} {{ w.last_name }} - {{ w.win_count }}</div>
+     <ul>
+       <li v-for="w in wins.wins">
+        {{ w.year }} {{ w.championship }}
+      </li>
+     </ul> 
   	</li>
-  </ul>
+  </ol>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
@@ -25,11 +30,12 @@ var app = new Vue({
   data: {
     message: 'Do you want to know our best winners?',
     topWinners:[],
-    k:10
+    k:10,
+    wins:[],
+    j:203
   },
   methods: {
-	    getWinners:function(){
-	    	// console.log("clicked");
+	    getWinners:function() {
 	    	var link = '/api/winners/' + this.k;
 			axios.get(link)
 			  .then(response => (
@@ -37,8 +43,17 @@ var app = new Vue({
 			  .catch(function (error) {
 			    console.log(error);
 			  });
-	  }
-  }
+      },
+      getWins:function() {
+        var link = '/api/winner/' + this.j
+      axios.get(link)
+        .then(response => (
+          this.wins = response.data))
+        .catch(function (error) {
+          console.log(error);
+        });
+      }
+    }
 })
 </script>
 </body>

@@ -1,10 +1,6 @@
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String
-
-from sqlalchemy import ForeignKey
+from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
+from sqlalchemy.ext.declarative import declarative_base 
 from sqlalchemy.orm import relationship
-
 
 engine = create_engine('postgresql:///honourboard', echo=True)
 
@@ -24,7 +20,7 @@ class Winner(Base):
 		self.last_name = last_name
 
 	def __repr__(self):
-		return "[ Winner {0} {1}, won: {2}]".format(self.first_name, self.last_name, len(self.competitions) )
+		return "[ Winner: {0} {1}, Wins: {2} ]".format(self.first_name, self.last_name, len(self.competitions) )
 
 	def serializeWinners(self):
 		return {
@@ -37,10 +33,10 @@ class Winner(Base):
 	
 	def serialize(self):
 		return {
-			'id': self.id,
-			'first_name': self.first_name,
-			'last_name': self.last_name,
-			'full_name':"{0} {1}".format(self.first_name, self.last_name),
+			#'id': self.id,
+			#'first_name': self.first_name,
+			#'last_name': self.last_name,
+			#'full_name':"{0} {1}".format(self.first_name, self.last_name),
 			'wins': [w.serialize() for w in self.competitions]
 		}
 			
@@ -59,7 +55,7 @@ class Competition(Base):
 		self.winner = winner
 
 	def __repr__(self):
-		return "[ Competition year={0}, championship={1}, winner={2} ]".format(self.year, self.championship, self.winner)
+		return "[ Year:{0}, Championship={1}, Winner={2} ]".format(self.year, self.championship, self.winner)
 
 	def serialize(self):
 		return {
