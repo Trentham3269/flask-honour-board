@@ -27,16 +27,13 @@ class Winner(Base):
 			'id': self.id,		
 			'first_name': self.first_name,
 			'last_name': self.last_name,
-			'win_count': len(self.competitions),
-			# 'competitions': [c.serialize() for c in self.competitions]
-			}
+			'win_count': len(self.competitions)
+		}
 	
 	def serialize(self):
 		return {
-			#'id': self.id,
-			#'first_name': self.first_name,
-			#'last_name': self.last_name,
-			#'full_name':"{0} {1}".format(self.first_name, self.last_name),
+			'id': self.id,
+			'full_name':"{0} {1}".format(self.first_name, self.last_name),
 			'wins': [w.serialize() for w in self.competitions]
 		}
 			

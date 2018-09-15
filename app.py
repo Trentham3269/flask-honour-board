@@ -9,18 +9,21 @@ session = Session()
 app = Flask(__name__)
 
 # Serve index.html
+#@app.route('/')
+#def index():
+#	return send_from_directory(directory="static", filename="index.html")
 @app.route('/')
 def index():
-	return send_from_directory(directory="static", filename="index.html")
+	return 'Hello, World!'
 
 # Endpoint for top n winners
-@app.route('/api/winners/<int:k>')
-def winners(k):
+@app.route('/api/winners/<int:n>')
+def winners(n):
 	winners = session.query(Winner).\
 				join(Competition).\
 				group_by(Winner.id).\
 				order_by(desc(func.count(Competition.id))).\
-				limit(k).\
+				limit(n).\
 				all()	
 	return jsonify([w.serializeWinners() for w in winners])
 
@@ -31,10 +34,3 @@ def winner(id):
 				filter_by(id=id).\
 				first()
 	return jsonify(winner.serialize())
-
-@app.route('/api/competition/<int:id>')
-def competition(id):
-	competition = session.query(Competition).\
-					filter_by(id=id).\
-		      		first()
-	return jsonify(competition.serialize())
