@@ -9,12 +9,10 @@ session = Session()
 app = Flask(__name__)
 
 # Serve index.html
-#@app.route('/')
-#def index():
-#	return send_from_directory(directory="static", filename="index.html")
 @app.route('/')
 def index():
-	return 'Hello, World!'
+	# return send_from_directory(directory="static", filename="index.html")
+	return '{0}, {1}'.format('Test', 'ing!')
 
 # Endpoint for top n winners
 @app.route('/api/winners/<int:n>')
@@ -33,4 +31,15 @@ def winner(id):
 	winner = session.query(Winner).\
 				filter_by(id=id).\
 				first()
-	return jsonify(winner.serialize())
+	return jsonify(winner.serializeWinner())
+
+# Endpoint to list a championship's winners
+@app.route('/api/competition/<string:championship>')
+def competition(championship):
+	competition = session.query(Competition).\
+					filter_by(championship=championship).\
+					order_by(desc(Competition.year)).\
+					all()	
+	return jsonify([c.serializeCompetition() for c in competition])
+
+
